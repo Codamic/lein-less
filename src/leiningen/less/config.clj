@@ -9,6 +9,7 @@
                         (map (partial nio/resolve root))
                         (map nio/absolute)
                         (filter nio/exists?) vec)
+     :target-files (->> (get raw-config :target-files))
      :target-path (->> (get raw-config :target-path (get project :target-path nil))
                        (nio/resolve root)
                        (nio/absolute))}))

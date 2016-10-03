@@ -19,13 +19,13 @@
 
 (defn- run-compiler
   "Run the lesscss compiler."
-  [project {:keys [source-paths target-path] :as config} watch?]
+  [project {:keys [source-paths target-path target-files] :as config} watch?]
   (engine/with-engine "javascript"
     (compiler/initialise)
     (println "Compiling {less} css:")
     (let [units (nio/compilation-units source-paths target-path)
           on-error (if watch? report-error abort-on-error)
-          compile (partial compiler/compile-project project units on-error)]
+          compile (partial compiler/compile-project project units target-files on-error)]
       (if watch?
         (nio/watch-resources project source-paths compile)
         (compile))
@@ -52,9 +52,7 @@
    (let [config (config project)]
      (case subtask
        "once" (apply once project config args)
-       "auto" (apply auto project config args)
-       )))
-  )
+       "auto" (apply auto project config args)))))
 
 (defn compile-hook [task & args]
   (apply task args)
