@@ -34,19 +34,22 @@
                         (escape-string (nio/absolute dst)))))
 
 
+(defn- compile
+  [src dst on-error]
+  (try
+    (compile-resource src dst)
+    (catch LessError ex
+      (on-error ex))))
+
 (defn compile-project
   "Take a normalised project configuration and a sequence of src/dst pairs, compiles each pair."
   [project units target-files on-error]
   (doseq [{:keys [^Path src ^Path dst]} units]
     (let [source      (nio/fstr project src)
           destination (nio/fstr project dst)]
-      (if (some #(= source %) target-files)
-        (do (println (format "%s => %s" source destination))
-            (try
-              (compile-resource src dst)
-              (catch LessError ex
-                (on-error ex))))
-        (println (str "Skiping " source))))
-
-)
-  )
+      (if (nil? target-files)
+        (compile src dst on-error)
+        (if (some #(= source %) target-files)
+          (do (println (format "%s => %s" source destination))
+              (compile src dst on-error))
+          (println (str "Skiping " source)))))))
